@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
-import Layout from '../components/Layout'
-import BookCard from '../components/BookCard'
+import { formatBooks } from '../utils/formatBooks'
 import { getBooks } from '../api/book'
 import { getPublishers } from '../api/publisher'
-import { formatBooks } from '../utils/formatBooks'
+import { useFuzzySearch } from '../hooks/useFuzzySearch'
+import BookCard from '../components/BookCard'
+import Layout from '../components/Layout'
+import SearchBar from '../components/SearchBar'
 
 export default function Home() {
   const [books, setBooks] = useState([])
+  const { query, setQuery, results } = useFuzzySearch(books)
 
   useEffect(() => {
     fetchData()
@@ -21,7 +24,9 @@ export default function Home() {
   return (
     <Layout>
       <h1>📚 My Books</h1>
-      {books.map((book) => (
+      <SearchBar value={query} onChange={setQuery} />
+
+      {results.map((book) => (
         <BookCard key={book.id} book={book} />
       ))}
     </Layout>
