@@ -15,7 +15,7 @@ export default function Navbar() {
         Add
       </NavItem>
       <NavItem to="/add-wishlist" active={pathname === '/add-wishlist'}>
-        +Wishlist
+        Wishlist
       </NavItem>
     </nav>
   )
