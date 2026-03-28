@@ -1,33 +1,32 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import Layout from '../components/Layout'
+import BookCard from '../components/BookCard'
+import { getWishlist } from '../api/wishlist'
+import { getPublishers } from '../api/publisher'
+import { formatBooks } from '../utils/formatBooks'
 
-export default function Home() {
+export default function Wishlist() {
   const [books, setBooks] = useState([])
 
   useEffect(() => {
-    fetchBooks()
+    fetchData()
   }, [])
 
-  async function fetchBooks() {
-    const { data } = await supabase.from('wishlist').select('*')
-    setBooks(data)
+  async function fetchData() {
+    const [books, publishers] = await Promise.all([
+      getWishlist(),
+      getPublishers(),
+    ])
+
+    setBooks(formatBooks(books, publishers))
   }
 
   return (
-    <div
-      style={{
-        maxWidth: 600,
-        margin: 'auto',
-        padding: 16,
-      }}
-    >
-      <h1>My Books</h1>
+    <Layout>
+      <h1>⭐ Wishlist</h1>
       {books.map((book) => (
-        <div key={book.id}>
-          <h3>{book.name}</h3>
-          <p>Volumes: {book.volume?.join(', ')}</p>
-        </div>
+        <BookCard key={book.id} book={book} />
       ))}
-    </div>
+    </Layout>
   )
 }

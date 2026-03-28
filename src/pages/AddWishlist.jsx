@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout'
+import { supabase } from '../lib/supabase'
+import { getPublishers } from '../api/publisher'
 
-export default function AddBooks() {
+const styles = {
+  form: {
+    maxWidth: 600,
+    margin: 'auto',
+    padding: 16,
+  },
+}
+
+export default function AddWishlist() {
   const [name, setName] = useState('')
   const [publisherId, setPublisherId] = useState('')
   const [items, setItems] = useState([{ volume: '', price: '' }])
@@ -28,41 +37,19 @@ export default function AddBooks() {
   }
 
   async function handleSubmit() {
-    const volumes = items.map((i) => i.volume)
-    const prices = items.map((i) => i.price)
+    await supabase.from('wishlist').insert({
+      name,
+      publisher_id: publisherId,
+      volume: items.map((i) => i.volume),
+      price: items.map((i) => i.price),
+    })
 
-    // Check if book exists
-    const { data: existing } = await supabase
-      .from('books')
-      .select('*')
-      .eq('name', name)
-      .single()
-
-    if (existing) {
-      // update
-      await supabase
-        .from('books')
-        .update({
-          volume: [...existing.volume, ...volumes],
-          price: [...(existing.price || []), ...prices],
-        })
-        .eq('id', existing.id)
-    } else {
-      // insert
-      await supabase.from('books').insert({
-        name,
-        publisher_id: publisherId,
-        volume: volumes,
-        price: prices,
-      })
-    }
-
-    alert('Saved!')
+    alert('Added to wishlist!')
   }
 
   return (
     <Layout>
-      <h1>⭐ Add Books</h1>
+      <h1>⭐ Add Wishlist</h1>
 
       <input
         placeholder="Book Name"
@@ -79,9 +66,9 @@ export default function AddBooks() {
       </select>
 
       {items.map((item, index) => (
-        <div key={index} style={{ display: 'flex', gap: 8 }}>
+        <div key={index}>
           <input
-            placeholder="Vol"
+            placeholder="Volume"
             onChange={(e) => updateItem(index, 'volume', e.target.value)}
           />
           <input
@@ -92,7 +79,7 @@ export default function AddBooks() {
       ))}
 
       <button onClick={addRow}>+ Add Volume</button>
-      <button onClick={handleSubmit}>💾 Save</button>
+      <button onClick={handleSubmit}>Save</button>
     </Layout>
   )
 }
